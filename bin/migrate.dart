@@ -4,10 +4,18 @@ import 'package:untitled1/database/database.dart';
 Future<void> main() async {
   print('Conectando a la base de datos...');
 
-  final connection = await Database.connect();
+  final connection = await Database.connect(databaseName: null);
 
   try {
     print('Conexión establecida.');
+
+    await connection.execute('''
+      CREATE DATABASE IF NOT EXISTS api_dart
+      DEFAULT CHARACTER SET utf8mb4
+      COLLATE utf8mb4_0900_ai_ci
+    ''');
+    await connection.execute('USE api_dart');
+    print('Base de datos api_dart disponible.');
 
     await connection.execute('''
       CREATE TABLE IF NOT EXISTS migrations (
@@ -49,7 +57,19 @@ Future<void> main() async {
 
       final sql = await file.readAsString();
 
-      await connection.execute(sql);
+      if (sql.trim().isEmpty) {
+        await connection.execute(
+          'INSERT INTO migrations (migration) VALUES (:migration)',
+          {'migration': migrationName},
+        );
+        print('$migrationName omitida (archivo vacío)');
+        continue;
+      }
+
+      for (final statement in sql.split(';')) {
+        if (statement.trim().isEmpty) continue;
+        await connection.execute(statement);
+      }
 
       await connection.execute(
         'INSERT INTO migrations (migration) VALUES (:migration)',

@@ -1,0 +1,9 @@
+-- Tabla ruta
+CREATE TABLE IF NOT EXISTS ruta (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    descripcion TEXT NULL,
+    estado ENUM('activo', 'inactivo') DEFAULT 'activo',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
