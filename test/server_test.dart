@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 
 void main() {
   final port = '8080';
-  final host = 'http://0.0.0.0:$port';
+  final host = 'http://127.0.0.1:$port';
   late Process p;
 
   setUp(() async {
@@ -23,13 +23,12 @@ void main() {
   test('Root', () async {
     final response = await get(Uri.parse('$host/'));
     expect(response.statusCode, 200);
-    expect(response.body, 'Hello, World!\n');
+    expect(response.body, contains('API'));
   });
 
-  test('Echo', () async {
+  test('Ruta inexistente', () async {
     final response = await get(Uri.parse('$host/echo/hello'));
-    expect(response.statusCode, 200);
-    expect(response.body, 'hello\n');
+    expect(response.statusCode, 404);
   });
 
   test('404', () async {

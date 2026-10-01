@@ -50,7 +50,7 @@ Router authRoutes(MySQLConnection connection) {
     }
     
     // Extraer user_id del token (simplificado)
-    final parts = base64Decode(token).toString().split(':');
+    final parts = utf8.decode(base64Decode(token)).split(':');
     final userId = int.tryParse(parts[0]);
     
     if (userId == null) {
