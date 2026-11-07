@@ -31,6 +31,11 @@ void main() {
     expect(response.statusCode, 404);
   });
 
+  test('Catálogo de conductores accesible', () async {
+    final response = await get(Uri.parse('$host/api/conductores'));
+    expect(response.statusCode, 200);
+  });
+
   test('404', () async {
     final response = await get(Uri.parse('$host/foobar'));
     expect(response.statusCode, 404);

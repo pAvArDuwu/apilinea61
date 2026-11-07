@@ -1,3 +1,4 @@
+import '../utils/db_value.dart';
 import 'asignacion_turno.dart';
 import 'ruta_parada.dart';
 import 'seguimiento_gps.dart';
@@ -8,7 +9,7 @@ class ControlRecorrido {
   final int id;
   final int asignacionTurnoId;
   final int? rutaParadaId;
-  final DateTime fechaHora;
+  final DateTime? fechaHora;
   final String estado; // pendiente | cumplido | omitido | fuera_ruta | en_curso | completado | cancelado
   final double? distanciaMetros;
   final String? observacion;
@@ -24,7 +25,7 @@ class ControlRecorrido {
     required this.id,
     required this.asignacionTurnoId,
     this.rutaParadaId,
-    required this.fechaHora,
+    this.fechaHora,
     this.estado = 'pendiente',
     this.distanciaMetros,
     this.observacion,
@@ -37,19 +38,15 @@ class ControlRecorrido {
 
   factory ControlRecorrido.fromJson(Map<String, dynamic> json) {
     return ControlRecorrido(
-      id: json['id'] as int,
-      asignacionTurnoId: json['asignacion_turno_id'] as int,
-      rutaParadaId: json['ruta_parada_id'] as int?,
-      fechaHora: DateTime.parse(json['fecha_hora'] as String),
-      estado: json['estado'] as String? ?? 'pendiente',
-      distanciaMetros: (json['distancia_metros'] as num?)?.toDouble(),
-      observacion: json['observacion'] as String?,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : null,
+      id: parseInt(json['id']) ?? 0,
+      asignacionTurnoId: parseInt(json['asignacion_turno_id']) ?? 0,
+      rutaParadaId: parseInt(json['ruta_parada_id']),
+      fechaHora: parseDateTime(json['fecha_hora']),
+      estado: json['estado']?.toString() ?? 'pendiente',
+      distanciaMetros: parseDouble(json['distancia_metros']),
+      observacion: json['observacion']?.toString(),
+      createdAt: parseDateTime(json['created_at']),
+      updatedAt: parseDateTime(json['updated_at']),
     );
   }
 
@@ -58,12 +55,12 @@ class ControlRecorrido {
       'id': id,
       'asignacion_turno_id': asignacionTurnoId,
       'ruta_parada_id': rutaParadaId,
-      'fecha_hora': fechaHora.toIso8601String(),
+      'fecha_hora': fechaHora == null ? null : toMysqlDateTime(fechaHora!),
       'estado': estado,
       'distancia_metros': distanciaMetros,
       'observacion': observacion,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
+      'created_at': createdAt == null ? null : toMysqlDateTime(createdAt!),
+      'updated_at': updatedAt == null ? null : toMysqlDateTime(updatedAt!),
     };
   }
 

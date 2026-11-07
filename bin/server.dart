@@ -12,27 +12,22 @@ import 'package:untitled1/routes/routes_ruta.dart';
 import 'package:untitled1/routes/routes_parada.dart';
 import 'package:untitled1/routes/routes_turno.dart';
 import 'package:untitled1/routes/routes_asignacion_turno.dart';
-import 'package:untitled1/routes/routes_control_recorrido.dart';
-import 'package:untitled1/routes/routes_seguimiento_gps.dart';
-import 'package:untitled1/routes/routes_auth.dart';
 import 'package:untitled1/routes/routes_conductor_endpoints.dart';
+import 'package:untitled1/services/laravel_api_proxy.dart';
 
 Future<void> main(List<String> args) async {
   final connection = await Database.connect();
   print('Conectado a MySQL.');
 
   final router = Router();
+  final laravelProxy = LaravelApiProxy();
 
-  // Health check
-  router.get('/', (Request request) => Response.ok('API Línea 57 - Control de Turnos\n'));
+  router.get(
+    '/',
+    (Request request) => Response.ok('API Línea 57 - Control de Turnos\n'),
+  );
 
-  // Autenticación
-  router.mount('/api', authRoutes(connection).call);
-  
-  // Endpoints específicos del conductor
-  router.mount('/api', conductorEndpointsRoutes(connection).call);
-
-  // Montar rutas del sistema de control de turnos
+  // Catálogos del API de práctica antes del montaje general de /api.
   router.mount('/api/conductores', conductorRoutes(connection).call);
   router.mount('/api/propietarios', propietarioRoutes(connection).call);
   router.mount('/api/micros', microRoutes(connection).call);
@@ -40,11 +35,16 @@ Future<void> main(List<String> args) async {
   router.mount('/api/rutas', rutaRoutes(connection).call);
   router.mount('/api/paradas', paradaRoutes(connection).call);
   router.mount('/api/turnos', turnoRoutes(connection).call);
-  router.mount('/api/asignaciones', asignacionTurnoRoutes(connection).call);
-  router.mount('/api/controles', controlRecorridoRoutes(connection).call);
-  router.mount('/api/gps', seguimientoGpsRoutes(connection).call);
 
-  // Documentación estática
+  // Rutas transaccionales móviles. Laravel aplica Sanctum, autorización y reglas.
+  // Ruta canónica de Laravel y alias histórico de ApiDart.
+  router.mount(
+    '/api/asignacion-turnos',
+    asignacionTurnoRoutes(laravelProxy).call,
+  );
+  router.mount('/api/asignaciones', asignacionTurnoRoutes(laravelProxy).call);
+  router.mount('/api', conductorEndpointsRoutes(laravelProxy).call);
+
   final staticHandler = createStaticHandler(
     'public',
     defaultDocument: 'docs.html',

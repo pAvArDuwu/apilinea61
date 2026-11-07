@@ -1,3 +1,4 @@
+import '../utils/db_value.dart';
 import 'ruta.dart';
 import 'parada.dart';
 
@@ -32,18 +33,14 @@ class RutaParada {
 
   factory RutaParada.fromJson(Map<String, dynamic> json) {
     return RutaParada(
-      id: json['id'] as int,
-      rutaId: json['ruta_id'] as int,
-      paradaId: json['parada_id'] as int,
-      orden: json['orden'] as int,
-      sentido: json['sentido'] as String,
-      estado: json['estado'] as String? ?? 'activo',
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : null,
+      id: parseInt(json['id']) ?? 0,
+      rutaId: parseInt(json['ruta_id']) ?? 0,
+      paradaId: parseInt(json['parada_id']) ?? 0,
+      orden: parseInt(json['orden']) ?? 0,
+      sentido: json['sentido']?.toString() ?? 'Ida',
+      estado: json['estado']?.toString() ?? 'activo',
+      createdAt: parseDateTime(json['created_at']),
+      updatedAt: parseDateTime(json['updated_at']),
     );
   }
 
@@ -55,8 +52,8 @@ class RutaParada {
       'orden': orden,
       'sentido': sentido,
       'estado': estado,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
+      'created_at': createdAt == null ? null : toMysqlDateTime(createdAt!),
+      'updated_at': updatedAt == null ? null : toMysqlDateTime(updatedAt!),
     };
   }
 

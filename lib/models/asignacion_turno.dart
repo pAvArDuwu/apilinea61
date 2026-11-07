@@ -1,3 +1,4 @@
+import '../utils/db_value.dart';
 import 'turno.dart';
 import 'ruta.dart';
 import 'micro.dart';
@@ -50,24 +51,54 @@ class AsignacionTurno {
   });
 
   factory AsignacionTurno.fromJson(Map<String, dynamic> json) {
-    return AsignacionTurno(
-      id: int.tryParse(json['id'].toString()) ?? 0,
-      fecha: json['fecha'].toString(),
-      turnoId: int.tryParse(json['turno_id'].toString()) ?? 0,
-      rutaId: int.tryParse(json['ruta_id'].toString()) ?? 0,
-      microId: int.tryParse(json['micro_id'].toString()) ?? 0,
-      conductorId: int.tryParse(json['conductor_id'].toString()) ?? 0,
-      horaSalida: json['hora_salida'] as String?,
-      horaLlegada: json['hora_llegada'] as String?,
-      estado: json['estado'] as String? ?? 'pendiente',
-      observaciones: json['observaciones'] as String?,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : null,
+    final asignacion = AsignacionTurno(
+      id: parseInt(json['id']) ?? 0,
+      fecha: json['fecha']?.toString() ?? '',
+      turnoId: parseInt(json['turno_id']) ?? 0,
+      rutaId: parseInt(json['ruta_id']) ?? 0,
+      microId: parseInt(json['micro_id']) ?? 0,
+      conductorId: parseInt(json['conductor_id']) ?? 0,
+      horaSalida: json['hora_salida']?.toString(),
+      horaLlegada: json['hora_llegada']?.toString(),
+      estado: json['estado']?.toString() ?? 'pendiente',
+      observaciones: json['observaciones']?.toString(),
+      createdAt: parseDateTime(json['created_at']),
+      updatedAt: parseDateTime(json['updated_at']),
     );
+
+    if (json['turno'] is Map) {
+      asignacion.turno = Turno.fromJson(
+        Map<String, dynamic>.from(json['turno'] as Map),
+      );
+    }
+    if (json['ruta'] is Map) {
+      asignacion.ruta = Ruta.fromJson(
+        Map<String, dynamic>.from(json['ruta'] as Map),
+      );
+    }
+    if (json['micro'] is Map) {
+      asignacion.micro = Micro.fromJson(
+        Map<String, dynamic>.from(json['micro'] as Map),
+      );
+    }
+    if (json['conductor'] is Map) {
+      asignacion.conductor = Conductor.fromJson(
+        Map<String, dynamic>.from(json['conductor'] as Map),
+      );
+    }
+    if (json['control_recorrido'] is Map) {
+      asignacion.controlRecorrido = ControlRecorrido.fromJson(
+        Map<String, dynamic>.from(json['control_recorrido'] as Map),
+      );
+    }
+    if (json['controles_recorrido'] is List) {
+      asignacion.controlesRecorrido = (json['controles_recorrido'] as List)
+          .whereType<Map>()
+          .map((e) => ControlRecorrido.fromJson(Map<String, dynamic>.from(e)))
+          .toList();
+    }
+
+    return asignacion;
   }
 
   Map<String, dynamic> toJson() {
@@ -82,8 +113,17 @@ class AsignacionTurno {
       'hora_llegada': horaLlegada,
       'estado': estado,
       'observaciones': observaciones,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
+      'created_at': createdAt == null ? null : toMysqlDateTime(createdAt!),
+      'updated_at': updatedAt == null ? null : toMysqlDateTime(updatedAt!),
+      if (turno != null) 'turno': turno!.toJson(),
+      if (ruta != null) 'ruta': ruta!.toJson(),
+      if (micro != null) 'micro': micro!.toJson(),
+      if (conductor != null) 'conductor': conductor!.toJson(),
+      if (controlRecorrido != null)
+        'control_recorrido': controlRecorrido!.toJson(),
+      if (controlesRecorrido != null)
+        'controles_recorrido':
+            controlesRecorrido!.map((e) => e.toJson()).toList(),
     };
   }
 

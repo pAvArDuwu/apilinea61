@@ -1,3 +1,4 @@
+import '../utils/db_value.dart';
 import 'ruta.dart';
 
 /// Modelo Parada - Parada geolocalizada
@@ -29,18 +30,14 @@ class Parada {
 
   factory Parada.fromJson(Map<String, dynamic> json) {
     return Parada(
-      id: int.tryParse(json['id'].toString()) ?? 0,
-      nombre: json['nombre'].toString(),
-      referencia: json['referencia'] as String?,
-      latitud: (json['latitud'] as num?)?.toDouble(),
-      longitud: (json['longitud'] as num?)?.toDouble(),
-      estado: json['estado'] as String? ?? 'activo',
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : null,
-      updatedAt: json['updated_at'] != null
-          ? DateTime.parse(json['updated_at'] as String)
-          : null,
+      id: parseInt(json['id']) ?? 0,
+      nombre: json['nombre']?.toString() ?? '',
+      referencia: json['referencia']?.toString(),
+      latitud: parseDouble(json['latitud']),
+      longitud: parseDouble(json['longitud']),
+      estado: json['estado']?.toString() ?? 'activo',
+      createdAt: parseDateTime(json['created_at']),
+      updatedAt: parseDateTime(json['updated_at']),
     );
   }
 
@@ -52,8 +49,8 @@ class Parada {
       'latitud': latitud,
       'longitud': longitud,
       'estado': estado,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
+      'created_at': createdAt == null ? null : toMysqlDateTime(createdAt!),
+      'updated_at': updatedAt == null ? null : toMysqlDateTime(updatedAt!),
     };
   }
 

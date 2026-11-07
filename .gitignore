@@ -1,3 +1,10 @@
 # https://dart.dev/guides/libraries/private-files
 # Created by `dart pub`
 .dart_tool/
+
+# Secrets and local IDE artifacts
+.env
+.env.*
+!.env.example
+.idea/caches/
+*.liveclass
